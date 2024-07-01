@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { dataBaseConfig } from 'database/database.config'
-import { ModulesModule } from './modules/modules.module';
+import { NoteModule } from './modules/note.module'
 
 @Module({
   imports: [
     SequelizeModule.forRoot(dataBaseConfig),
-    ModulesModule,
+    NoteModule,
   ],
 })
 export class AppModule { }
