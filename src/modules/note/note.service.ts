@@ -49,10 +49,6 @@ export class NoteService {
   async update(id: string, data: UpdateNoteDto): Promise<NoteEntity> {
     try {
       const note = await this.findOne(id)
-      if (!note) {
-        throw new NotFoundException('Note not found')
-      }
-
       const updatedNote = this.noteRepository.merge(note, data)
       const errors = await validate(updatedNote)
       if (errors.length > 0) {
