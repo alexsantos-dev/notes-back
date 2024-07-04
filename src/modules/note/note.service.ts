@@ -28,7 +28,11 @@ export class NoteService {
 
   async findAll(): Promise<NoteEntity[]> {
     try {
-      const results = await this.noteRepository.find()
+      const results = await this.noteRepository.find({
+        order: {
+          updatedAt: 'DESC'
+        }
+      })
       if (results.length === 0) {
         throw new Error('No results found for this operation')
       }
