@@ -4,7 +4,7 @@ import { NoteEntity } from 'src/modules/note/entities/note.entity'
 
 export const dataBaseConfig: TypeOrmModuleOptions = {
   type: 'sqlite',
-  database: path.join(__dirname, 'database', 'database.sqlite'),
+  database: 'database/database.sqlite',
   entities: [NoteEntity],
   migrations: [path.join(__dirname, 'migrations', '*.ts')],
   synchronize: true,
