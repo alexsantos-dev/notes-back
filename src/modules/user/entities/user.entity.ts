@@ -11,7 +11,7 @@ export class UserEntity {
   @IsNotEmpty()
   name: string
 
-  @Column({ name: 'email', type: 'text' })
+  @Column({ name: 'email', type: 'text', unique: true })
   @IsNotEmpty()
   @IsEmail()
   email: string

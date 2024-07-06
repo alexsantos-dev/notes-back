@@ -5,20 +5,27 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { NoteEntity } from './entities/note.entity'
 import { validate } from 'class-validator'
+import { UserEntity } from '../user/entities/user.entity'
 
 @Injectable()
 export class NoteService {
   constructor(
     @InjectRepository(NoteEntity)
-    private readonly noteRepository: Repository<NoteEntity>
+    private readonly noteRepository: Repository<NoteEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>
   ) { }
 
-  async create(data: CreateNoteDto): Promise<NoteEntity> {
-    const newNote = this.noteRepository.create(data)
+  async create(userId: string, data: CreateNoteDto): Promise<NoteEntity> {
+    const user = await this.userRepository.findOne({ where: { id: userId } })
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+    const newNote = this.noteRepository.create({ ...data, user })
     try {
       const errors = await validate(newNote)
       if (errors.length > 0) {
-        throw new Error('Object data ivalid')
+        throw new Error('Object data invalid')
       }
       return await this.noteRepository.save(newNote)
     } catch (error) {
@@ -26,12 +33,13 @@ export class NoteService {
     }
   }
 
-  async findAll(): Promise<NoteEntity[]> {
+  async findAll(userId: string): Promise<NoteEntity[]> {
     try {
       const results = await this.noteRepository.find({
+        where: { user: { id: userId } },
         order: {
-          updatedAt: 'DESC'
-        }
+          updatedAt: 'DESC',
+        },
       })
       if (results.length === 0) {
         throw new Error('No results found for this operation')
@@ -42,30 +50,33 @@ export class NoteService {
     }
   }
 
-  async findOne(id: string): Promise<NoteEntity> {
-    try {
-      return await this.noteRepository.findOneOrFail({ where: { id } })
-    } catch (error) {
-      throw new NotFoundException(error.message)
-    }
+  async findOne(userId: string, noteId: string): Promise<NoteEntity> {
+    const note = await this.findNoteByUser(userId, noteId)
+    return note
   }
 
-  async update(id: string, data: UpdateNoteDto): Promise<NoteEntity> {
-    try {
-      const note = await this.findOne(id)
-      const updatedNote = this.noteRepository.merge(note, data)
-      const errors = await validate(updatedNote)
-      if (errors.length > 0) {
-        throw new Error('Object data ivalid')
-      }
-      return await this.noteRepository.save(updatedNote)
-    } catch (error) {
-      throw new BadRequestException(error.message)
+  async update(userId: string, noteId: string, data: UpdateNoteDto): Promise<NoteEntity> {
+    const note = await this.findNoteByUser(userId, noteId)
+    const updatedNote = this.noteRepository.merge(note, data)
+    const errors = await validate(updatedNote)
+    if (errors.length > 0) {
+      throw new Error('Object data invalid')
     }
+    return await this.noteRepository.save(updatedNote)
   }
 
-  async remove(id: string): Promise<undefined> {
-    await this.findOne(id)
-    await this.noteRepository.delete(id)
+  async remove(userId: string, noteId: string): Promise<void> {
+    const note = await this.findNoteByUser(userId, noteId)
+    await this.noteRepository.remove(note)
+  }
+
+  private async findNoteByUser(userId: string, noteId: string): Promise<NoteEntity> {
+    const note = await this.noteRepository.findOne({
+      where: { id: noteId, user: { id: userId } },
+    })
+    if (!note) {
+      throw new NotFoundException('Note not found')
+    }
+    return note
   }
 }

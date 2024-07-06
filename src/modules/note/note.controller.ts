@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, HttpStatus } from '@nestjs/common'
 import { NoteService } from './note.service'
 import { CreateNoteDto } from './dto/create-note.dto'
 import { UpdateNoteDto } from './dto/update-note.dto'
@@ -6,33 +6,33 @@ import { ParseUUIDPipe } from '@nestjs/common'
 import { HttpCode } from '@nestjs/common'
 import { NoteEntity } from './entities/note.entity'
 
-@Controller('/notes')
+@Controller('user/:userId/notes')
 export class NoteController {
   constructor(private readonly noteService: NoteService) { }
 
   @Post()
-  async create(@Body() createNoteDto: CreateNoteDto): Promise<NoteEntity> {
-    return await this.noteService.create(createNoteDto)
+  async create(@Param('userId', new ParseUUIDPipe()) userId: string, @Body() data: CreateNoteDto): Promise<NoteEntity> {
+    return await this.noteService.create(userId, data)
   }
 
   @Get()
-  async findAll(): Promise<NoteEntity[]> {
-    return await this.noteService.findAll()
+  async findAll(@Param('userId', new ParseUUIDPipe()) userId: string): Promise<NoteEntity[]> {
+    return await this.noteService.findAll(userId)
   }
 
-  @Get(':id')
-  async findOne(@Param('id', new ParseUUIDPipe()) id: string): Promise<NoteEntity> {
-    return await this.noteService.findOne(id)
+  @Get(':noteId')
+  async findOne(@Param('userId', new ParseUUIDPipe()) userId: string, @Param('noteId', new ParseUUIDPipe()) noteId: string): Promise<NoteEntity> {
+    return await this.noteService.findOne(userId, noteId)
   }
 
-  @Patch(':id')
-  async update(@Param('id', new ParseUUIDPipe()) id: string, @Body() data: UpdateNoteDto): Promise<NoteEntity> {
-    return await this.noteService.update(id, data)
+  @Patch(':noteId')
+  async update(@Param('userId', new ParseUUIDPipe()) userId: string, @Param('noteId', new ParseUUIDPipe()) noteId: string, @Body() data: UpdateNoteDto): Promise<NoteEntity> {
+    return await this.noteService.update(userId, noteId, data)
   }
 
-  @Delete(':id')
+  @Delete(':noteId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', new ParseUUIDPipe()) id: string): Promise<undefined> {
-    await this.noteService.remove(id)
+  async remove(@Param('userId', new ParseUUIDPipe()) userId: string, @Param('noteId', new ParseUUIDPipe()) noteId: string): Promise<undefined> {
+    await this.noteService.remove(userId, noteId)
   }
 }
