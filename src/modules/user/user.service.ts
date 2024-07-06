@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { UserEntity } from './entities/user.entity'
 import { Repository } from 'typeorm'
 import { validate } from 'class-validator'
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UserService {
@@ -14,7 +15,8 @@ export class UserService {
   ) { }
 
   async create(data: CreateUserDto): Promise<UserEntity> {
-    const newNote = this.userRepository.create(data)
+    const hashedPassword = await bcrypt.hash(data.password, 10)
+    const newNote = this.userRepository.create({ ...data, password: hashedPassword })
     try {
       const errors = await validate(newNote)
       if (errors.length > 0) {
@@ -42,7 +44,7 @@ export class UserService {
     }
   }
 
-  async findOne(id: string): Promise<UserEntity> {
+  async findOneById(id: string): Promise<UserEntity> {
     try {
       return await this.userRepository.findOneOrFail({ where: { id } })
     } catch (error) {
@@ -50,9 +52,17 @@ export class UserService {
     }
   }
 
+  async findOneByEmail(email: string): Promise<UserEntity> {
+    try {
+      return await this.userRepository.findOneOrFail({ where: { email } })
+    } catch (error) {
+      throw new NotFoundException(error.message)
+    }
+  }
+
   async update(id: string, data: UpdateUserDto): Promise<UserEntity> {
     try {
-      const user = await this.findOne(id)
+      const user = await this.findOneById(id)
       const updatedUser = this.userRepository.merge(user, data)
       const errors = await validate(updatedUser)
       if (errors.length > 0) {
@@ -65,7 +75,7 @@ export class UserService {
   }
 
   async remove(id: string): Promise<undefined> {
-    await this.findOne(id)
+    await this.findOneById(id)
     await this.userRepository.delete(id)
   }
 }
