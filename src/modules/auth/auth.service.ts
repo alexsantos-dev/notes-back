@@ -12,12 +12,12 @@ export class AuthService {
     private jwtService: JwtService
   ) { }
 
-  async signIn(signIn: SignInDto): Promise<{ acess_token: string }> {
+  async signIn(signIn: SignInDto): Promise<{ token: string }> {
     const user = await this.userService.findOneByEmail(signIn.email)
     if (user && await bcrypt.compare(signIn.password, user.password)) {
       const payload = { sub: user.id, email: user.email }
       return {
-        acess_token: await this.jwtService.signAsync(payload)
+        token: await this.jwtService.signAsync(payload)
       }
     } else {
       throw new UnauthorizedException('invalid email or password')
