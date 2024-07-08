@@ -1,10 +1,15 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 
-const PORT = process.env.PORT || 3000
-
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
-  await app.listen(PORT)
+  const app = await NestFactory.create(AppModule, { cors: true })
+  app.enableCors({
+    origin: '',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'Authorization'],
+    exposedHeaders: ['Authorization'],
+    credentials: true
+  })
+  await app.listen(parseInt(process.env.PORT))
 }
 bootstrap()
