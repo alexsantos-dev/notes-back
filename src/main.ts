@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import * as dotenv from 'dotenv'
+import { ping } from './ping'
 
 async function bootstrap() {
   dotenv.config()
+  await ping()
   const app = await NestFactory.create(AppModule, { cors: true })
   app.enableCors({
     origin: [process.env.FRONT, process.env.LOCAL],
