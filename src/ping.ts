@@ -5,7 +5,7 @@ export async function
 
   const accessUrlAndPrintMessage = async () => {
     try {
-      await axios.get('https://notes-back-h7u5.onrender.com/')
+      await axios.get('https://notes-back-h7u5.onrender.com/user')
       console.log('Página acessada!')
     } catch (error) {
       console.error('Erro ao acessar a página:', error.message)
