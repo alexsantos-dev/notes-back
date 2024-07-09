@@ -23,4 +23,16 @@ export class AuthService {
       throw new UnauthorizedException('invalid email or password')
     }
   }
+
+  async signInWithGoogle(email: string, name: string, googleId: string): Promise<{ id: string, token: string }> {
+    let user = await this.userService.findOneByEmail(email)
+
+    if (!user) {
+      user = await this.userService.create({ email, name, password: googleId })
+    }
+
+    const payload = { sub: user.id, email: user.email }
+    const token = await this.jwtService.signAsync(payload)
+    return { id: user.id, token }
+  }
 }
