@@ -19,7 +19,12 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signIn: SignInDto) {
+  async signIn(@Body() signIn: SignInDto) {
     return this.authService.signIn(signIn)
+  }
+  @HttpCode(HttpStatus.OK)
+  @Post('google')
+  async signInWithGoogle(@Body() { email, name, password }) {
+    return this.authService.signInWithGoogle(email, name, password)
   }
 }
