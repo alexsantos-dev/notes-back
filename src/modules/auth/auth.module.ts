@@ -3,11 +3,13 @@ import { AuthService } from './auth.service'
 import { JwtModule } from '@nestjs/jwt'
 import { jwtConstants } from './constants'
 import { AuthController } from './auth.controller'
-import { UserService } from '../user/user.service'
 import { UserModule } from '../user/user.module'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { UserEntity } from '../user/entities/user.entity'
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([UserEntity]),
     UserModule,
     JwtModule.register({
       global: true,

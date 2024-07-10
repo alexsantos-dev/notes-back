@@ -24,8 +24,7 @@ export class AuthController {
   }
   @HttpCode(HttpStatus.OK)
   @Post('google')
-  async signInWithGoogle(@Body() body: any) {
-    const { email, name, googleId } = body
-    return this.authService.signInWithGoogle(email, name, googleId)
+  async signInWithGoogle(@Body() { email, name, password }) {
+    return this.authService.signInWithGoogle(email, name, password)
   }
 }
